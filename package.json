@@ -1,0 +1,30 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "this is my project to learn system-design concept.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js",
+    "dev": "npx nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nayak-sakshi/Url-shortener.git"
+  },
+  "author": "Sakshi Nayak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nayak-sakshi/Url-shortener/issues"
+  },
+  "homepage": "https://github.com/Nayak-sakshi/Url-shortener#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.4",
+    "nanoid": "^6.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
