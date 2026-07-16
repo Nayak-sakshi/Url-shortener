@@ -42,16 +42,13 @@ class UrlService {
         };
     }
     async redirect(shortCode) {
-        const url = await UrlRepository.findByShortCode(shortCode);
+        const url = await UrlRepository.findAndIncrementClicks(shortCode);
 
         if (!url) {
             throw new AppError("URL not found", 404);
         }
 
-        await UrlRepository.increaseClicks(url._id);
-
         return url.originalUrl;
-
     }
 }
 

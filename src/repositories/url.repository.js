@@ -8,6 +8,13 @@ class UrlRepository {
     async findByShortCode(shortCode) {
         return Url.findOne({ shortCode });
     }
+    async findAndIncrementClicks(shortCode) {
+        return Url.findOneAndUpdate(
+            { shortCode },
+            { $inc: { clicks: 1 } },
+            { new: true }
+        );
+    }
     async increaseClicks(id) {
         return Url.findByIdAndUpdate(id, { $inc: { clicks: 1 } });
     }
