@@ -1,5 +1,6 @@
 const { nanoid } = require('nanoid');
 const UrlRepository = require('../repositories/url.repository');
+const redisRepository = require("../repositories/redis.repository");
 
 const AppError = require('../errors/AppError')
 
@@ -42,14 +43,42 @@ class UrlService {
         };
     }
     async redirect(shortCode) {
-        const url = await UrlRepository.findAndIncrementClicks(shortCode);
+
+        const cacheKey = `url:${shortCode}`;
+
+        // STEP 1 - Check Redis
+        const cachedUrl = await redisRepository.get(cacheKey);
+
+        if (cachedUrl) {
+
+            console.log("✅ Cache HIT");
+
+            await UrlRepository.incrementClicks(shortCode);
+
+            return cachedUrl;
+        }
+
+        console.log("❌ Cache MISS");
+
+        // STEP 2 - MongoDB
+        const url = await UrlRepository.findByShortCode(shortCode);
 
         if (!url) {
-            throw new AppError("URL not found", 404);
+            throw new AppError("Short URL not found", 404);
         }
+
+        // STEP 3 - Save in Redis
+        await redisRepository.set(
+            cacheKey,
+            url.originalUrl
+        );
+
+        // STEP 4 - Increment Click
+        await UrlRepository.incrementClicks(shortCode);
 
         return url.originalUrl;
     }
+    
 }
 
 module.exports = new UrlService();
