@@ -52,8 +52,8 @@ class UrlService {
         if (cachedUrl) {
 
             console.log("✅ Cache HIT");
-
-            await UrlRepository.incrementClicks(shortCode);
+            console.log(`Increasing click:${shortCode}`);
+            await redisRepository.increment(`click:${shortCode}`);
 
             return cachedUrl;
         }
@@ -74,11 +74,11 @@ class UrlService {
         );
 
         // STEP 4 - Increment Click
-        await UrlRepository.incrementClicks(shortCode);
+        await redisRepository.increment(`click:${shortCode}`);
 
         return url.originalUrl;
     }
-    
+
 }
 
 module.exports = new UrlService();
