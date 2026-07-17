@@ -24,6 +24,13 @@ class UrlRepository {
     async findById(id) {
         return Url.findById(id);
     }
+    async increamentClickBy(shortCode, count) {
+        return Url.findOneAndUpdate(
+            { shortCode },
+            { $inc: { clicks: count } },
+            { new: true }
+        )
+    }
 
 }
 
