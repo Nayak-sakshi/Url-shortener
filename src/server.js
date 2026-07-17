@@ -18,7 +18,7 @@ const startServer = async () => {
 
         setInterval(async () => {
             await clickSyncWorker.syncClicks();
-        }, 60000);
+        }, 600000);
     } catch (error) {
         console.error('Failed to start server:', error);
         process.exit(1);
