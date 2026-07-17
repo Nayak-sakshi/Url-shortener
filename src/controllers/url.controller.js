@@ -3,8 +3,8 @@ const AppResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 
 const createShortUrl = asyncHandler(async (req, res) => {
-    const { originalUrl } = req.body;
-    const data = await urlService.createShortUrl(originalUrl);
+    const data = req.body;
+    urlService.createShortUrl(data);
 
     return res.status(201).json(
         new AppResponse(201,
