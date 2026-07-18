@@ -13,7 +13,7 @@ class UserRepository {
     async findById(id) {
         return User.findById(id);
     }
-
+    
 }
 
 module.exports = new UserRepository();

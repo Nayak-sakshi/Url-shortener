@@ -1,50 +1,93 @@
 const { nanoid } = require('nanoid');
 const UrlRepository = require('../repositories/url.repository');
 const redisRepository = require("../repositories/redis.repository");
-const { validateAccessibleUrl } = require('../helpers/url.helper');
+const { validateAccessibleUrl, RESERVED_ALIASES } = require('../helpers/url.helper');
+const { pick } = require("../helpers/object.helper");
 
 const AppError = require('../errors/AppError')
 
 class UrlService {
-    async createShortUrl(data) {
-        if (!originalUrl) {
-            throw new AppError('Original URL is required', 400);
-        }
+   async createShortUrl(data, userId) {
 
-        let url;
-        let isCreated = false;
+    const { originalUrl, expiresAt, customAlias } = data;
 
-        while (!isCreated) {
-
-            try {
-                const { originalUrl, expiresAt } = data;
-
-                const shortCode = nanoid(8);
-
-                url = await UrlRepository.create({
-                    originalUrl,
-                    shortCode,
-                    expiresAt
-                });
-                console.log("Saved document", url);
-                isCreated = true;
-
-            } catch (error) {
-                if (error.code === 11000) {
-                    continue
-                } else {
-                    throw error;
-                }
-            }
-        }
-        return {
-            originalUrl: url.originalUrl,
-            shortCode: url.shortCode,
-            shortUrl: `${process.env.BASE_URL}/${url.shortCode}`,
-            clicks: url.clicks,
-            createAt: url.createdAt,
-        };
+    if (!originalUrl) {
+        throw new AppError(
+            "Original URL is required",
+            400
+        );
     }
+
+    const shortCode =
+        await this.generateShortCode(customAlias);
+
+    const url = await UrlRepository.create({
+
+        originalUrl,
+
+        shortCode,
+
+        expiresAt,
+
+        userId,
+
+        isCustomAlias: Boolean(customAlias)
+
+    });
+
+    return {
+        originalUrl: url.originalUrl,
+        shortCode: url.shortCode,
+        shortUrl: `${process.env.BASE_URL}/${url.shortCode}`,
+        clicks: url.clicks,
+        createdAt: url.createdAt
+    };
+}
+    async generateShortCode(customAlias) {
+
+        // ---------- Custom Alias ----------
+        if (customAlias) {
+
+            const alias = customAlias.trim().toLowerCase();
+
+            if (RESERVED_ALIASES.includes(alias)) {
+                throw new AppError(
+                    "This alias is reserved.",
+                    400
+                );
+            }
+
+            const existingAlias =
+                await UrlRepository.findByShortCode(alias);
+
+            if (existingAlias) {
+                throw new AppError(
+                    "Alias already exists.",
+                    409
+                );
+            }
+
+            return alias;
+        }
+
+        // ---------- Auto Generated Alias ----------
+        const { nanoid } = await import("nanoid");
+
+        while (true) {
+
+            const shortCode = nanoid(8);
+
+            const existing =
+                await UrlRepository.findByShortCode(shortCode);
+
+            if (!existing) {
+                return shortCode;
+            }
+
+        }
+
+    }
+
     async redirect(shortCode) {
 
         const cacheKey = `url:${shortCode}`;
@@ -94,7 +137,82 @@ class UrlService {
 
         return url.originalUrl;
     }
+    async getMyUrls(userId, page = 1, limit = 10) {
 
-}
+        page = Math.max(Number(page) || 1, 1);
+        limit = Math.min(Math.max(Number(limit) || 10, 1), 100);
+
+        const { urls, total } =
+            await UrlRepository.findByUserId(userId, {
+                page,
+                limit
+            });
+
+        return {
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                hasNextPage: page * limit < total,
+                hasPreviousPage: page > 1
+            },
+            urls
+        };
+    }
+    async getUrlById(id, userId) {
+
+        const url = await UrlRepository.findByIdAndUser(
+            id,
+            userId
+        );
+
+        if (!url) {
+            throw new AppError(
+                "URL not found",
+                404
+            );
+        }
+
+        return url;
+
+    }
+    async updateUrl(id, userId, data) {
+         const updateData = pick(data, [
+            "originalUrl",
+            "expiresAt"
+        ]);
+
+        const url = await UrlRepository.updateByIdAndUser(
+            id,
+            userId,
+            updateData
+        );
+
+        if (!url) {
+            throw new AppError("URL not found", 404);
+        }
+
+        return url;
+
+    }
+    async deleteUrl(id, userId) {
+
+        const url =
+            await UrlRepository.softDeleteByIdAndUser(
+                id,
+                userId
+            );
+
+        if (!url) {
+            throw new AppError(
+                "URL not found",
+                404
+            );
+        }
+
+        return;
+    }
+}s
 
 module.exports = new UrlService();

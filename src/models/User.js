@@ -25,6 +25,16 @@ const userSchema = new mongoose.Schema(
             type: String,
             enum: ["USER", "ADMIN"],
             default: "USER"
+        },
+        deletedAt: {
+            type: Date,
+            default: null
+        },
+
+        deletedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null
         }
     },
     {
