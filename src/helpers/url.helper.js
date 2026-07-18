@@ -1,6 +1,17 @@
 const AppError = require("../errors/AppError");
 const redisRepository = require("../repositories/redis.repository");
 
+const RESERVED_ALIASES = [
+    "login",
+    "register",
+    "admin",
+    "dashboard",
+    "profile",
+    "analytics",
+    "api",
+    "health",
+    "favicon.ico"
+];
 const validateAccessibleUrl = async (url, cacheKey = null) => {
 
     if (!url.isActive) {
@@ -23,6 +34,7 @@ const validateAccessibleUrl = async (url, cacheKey = null) => {
     }
 };
 
+
 module.exports = {
-    validateAccessibleUrl
+    validateAccessibleUrl, RESERVED_ALIASES
 };

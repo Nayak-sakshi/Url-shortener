@@ -6,15 +6,25 @@ const createShortUrlSchema = Joi.object({
         .required(),
 
     expiresAt: Joi.date()
-        .greater("now")
-        .optional(),
+        .allow(null),
 
     customAlias: Joi.string()
-        .alphanum()
+        .trim()
         .min(3)
         .max(30)
+        .pattern(/^[a-zA-Z0-9-_]+$/)
         .optional()
 });
+
+const updateUrlSchema = Joi.object({
+
+    originalUrl: Joi.string()
+        .uri(),
+
+    expiresAt: Joi.date()
+        .allow(null)
+
+}).min(1);
 
 module.exports = {
     createShortUrlSchema
