@@ -1,6 +1,7 @@
 const { nanoid } = require('nanoid');
 const UrlRepository = require('../repositories/url.repository');
 const redisRepository = require("../repositories/redis.repository");
+const ClickRepository = require("../repositories/click.repository");
 const { validateAccessibleUrl, RESERVED_ALIASES } = require('../helpers/url.helper');
 const { pick } = require("../helpers/object.helper");
 
@@ -122,7 +123,7 @@ async createShortUrl(data, userId) {
 
     }
 
-    async redirect(shortCode) {
+    async redirect(shortCode, req) {
 
         const cacheKey = `url:${shortCode}`;
 
@@ -168,6 +169,21 @@ async createShortUrl(data, userId) {
 
         // STEP 4 - Increment Click
         await redisRepository.increment(`click:${shortCode}`);
+        try {
+
+            await ClickRepository.create({
+
+                urlId: url._id,
+
+                shortCode: url.shortCode
+
+            });
+
+        } catch (error) {
+
+            console.error("Failed to save click analytics:", error);
+
+        }
 
         return url.originalUrl;
     }

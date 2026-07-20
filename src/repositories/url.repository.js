@@ -79,16 +79,16 @@ class UrlRepository {
             userId,
             isActive: true
         })
-        .select({
-            originalUrl: 1,
-            shortCode: 1,
-            clicks: 1,
-            expiresAt: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            isCustomAlias: 1
-        })
-        .lean();
+            .select({
+                originalUrl: 1,
+                shortCode: 1,
+                clicks: 1,
+                expiresAt: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                isCustomAlias: 1
+            })
+            .lean();
 
     }
     async updateByIdAndUser(id, userId, updateData) {
@@ -107,8 +107,8 @@ class UrlRepository {
                 runValidators: true
             }
         )
-        .select(URL_DETAILS_FIELDS)
-        .lean();
+            .select(URL_DETAILS_FIELDS)
+            .lean();
 
     }
     async softDeleteByIdAndUser(id, userId) {
@@ -130,6 +130,49 @@ class UrlRepository {
         ).lean();
 
     }
+    async getTotalUrls(userId) {
+
+        return Url.countDocuments({
+            userId
+        });
+
+    }
+    async getActiveUrls(userId) {
+
+        return Url.countDocuments({
+
+            userId,
+
+            isActive: true
+
+        });
+
+    }
+    async getDeletedUrls(userId) {
+
+        return Url.countDocuments({
+
+            userId,
+
+            isActive: false
+
+        });
+
+    }
+    async getExpiredUrls(userId) {
+
+        return Url.countDocuments({
+
+            userId,
+
+            expiresAt: {
+                $lt: new Date()
+            }
+
+        });
+
+    }
+
 }
 
 module.exports = new UrlRepository();

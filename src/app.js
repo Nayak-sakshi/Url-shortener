@@ -1,7 +1,9 @@
 const express = require("express");
 
 const errorHandler = require("./middlewares/errorHandler");
-
+const urlRoutes = require("./routes/url.routes");
+const authRoutes = require("./routes/auth.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 const app = express();
 
 app.use(express.json());
@@ -17,12 +19,11 @@ app.use((req, res, next) => {
 });
 
 // Define your routes here
-const urlRoutes = require("./routes/url.routes");
 app.use("/api/v1/urls", urlRoutes);
 
-
-const authRoutes = require("./routes/auth.routes");
 app.use("/api/v1/auth", authRoutes);
+
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 app.use(errorHandler);
 
