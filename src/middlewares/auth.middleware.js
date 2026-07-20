@@ -1,49 +1,29 @@
 const AppError = require("../errors/AppError");
 
 const UserRepository = require("../repositories/user.repository");
-
-const {
-    verifyToken
-} = require("../helpers/auth.helper");
-
+const { verifyToken } = require("../helpers/auth.helper");
 const asyncHandler = require("../utils/asyncHandler");
 
 const authenticate = asyncHandler(async (req, res, next) => {
 
-    const authHeader = req.headers.authorization;
-
-    if (
-        !authHeader ||
-        !authHeader.startsWith("Bearer ")
-    ) {
-        throw new AppError(
-            "Authentication required",
-            401
-        );
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    const payload = verifyToken(token);
-
-    const user =
-        await UserRepository.findById(payload.id);
+    const user = await getUserFromToken(req.headers.authorization);
 
     if (!user) {
-        throw new AppError(
-            "User not found",
-            401
-        );
+        throw new AppError("Authentication required", 401);
     }
 
-    req.user = {
-        id: user._id,
-        email: user.email,
-        role: user.role
-    };
+    req.user = user;
+
+    next();
+
+});
+const optionalAuthenticate = asyncHandler(async (req, res, next) => {
+
+    req.user = await getUserFromToken(req.headers.authorization);
 
     next();
 
 });
 
-module.exports = authenticate;
+
+module.exports = { authenticate, optionalAuthenticate };

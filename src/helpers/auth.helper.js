@@ -13,12 +13,32 @@ const generateToken = (payload) => {
         }
     );
 };
+//  verifyToken = (token) => {
+//     return jwt.verify(
+//         token,
+//         process.env.JWT_SECRET
+//     );
+// };
 const verifyToken = (token) => {
-    return jwt.verify(
-        token,
-        process.env.JWT_SECRET
-    );
+
+    try {
+
+        return jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+    } catch (error) {
+
+        throw new AppError(
+            "Invalid or expired token",
+            401
+        );
+
+    }
+
 };
+
 const hashPassword = async (password) => {
     return bcrypt.hash(password, SALT_ROUNDS);
 };
@@ -44,7 +64,24 @@ const buildAuthResponse = (user) => {
         token
     };
 };
+const getUserFromToken = async (authHeader) => {
 
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return null;
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const payload = verifyToken(token);
+
+    const user = await UserRepository.findById(payload.id);
+
+    if (!user) {
+        throw new AppError("User not found", 401);
+    }
+
+    return user;
+};
 
 
 
@@ -54,5 +91,6 @@ module.exports = {
     hashPassword,
     comparePassword,
     generateToken,
-    verifyToken
+    verifyToken,
+    getUserFromToken
 };
