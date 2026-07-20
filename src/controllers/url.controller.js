@@ -4,12 +4,12 @@ const asyncHandler = require('../utils/asyncHandler');
 
 const createShortUrl = asyncHandler(async (req, res) => {
     const data = req.body;
-    urlService.createShortUrl(data);
+    const result = await urlService.createShortUrl(data, req.user?.id || null);
 
     return res.status(201).json(
         new AppResponse(201,
             'Short URL created successfully',
-            data
+            result
         )
     );
 })
