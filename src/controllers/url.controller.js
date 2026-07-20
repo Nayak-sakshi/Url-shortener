@@ -79,4 +79,4 @@ const deleteUrl = asyncHandler(async (req, res) => {
     );
 
 });
-module.exports = { createShortUrl, redirect, getMyUrls, getUrl };
+module.exports = { createShortUrl, redirect, getMyUrls, getUrl, updateUrl, deleteUrl};

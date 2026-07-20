@@ -19,6 +19,8 @@ app.use((req, res, next) => {
 // Define your routes here
 const urlRoutes = require("./routes/url.routes");
 app.use("/api/v1/urls", urlRoutes);
+
+
 const authRoutes = require("./routes/auth.routes");
 app.use("/api/v1/auth", authRoutes);
 
