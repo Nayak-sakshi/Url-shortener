@@ -16,7 +16,10 @@ const createShortUrl = asyncHandler(async (req, res) => {
 
 const redirect = asyncHandler(async (req, res) => {
     const { shortCode } = req.params;
-    const originalUrl = await urlService.redirect(shortCode);
+    const originalUrl = await urlService.redirect(
+        req.params.shortCode,
+        req
+    );
     return res.redirect(originalUrl);
 })
 
@@ -79,4 +82,4 @@ const deleteUrl = asyncHandler(async (req, res) => {
     );
 
 });
-module.exports = { createShortUrl, redirect, getMyUrls, getUrl };
+module.exports = { createShortUrl, redirect, getMyUrls, getUrl, updateUrl, deleteUrl};

@@ -1,15 +1,34 @@
 const { nanoid } = require('nanoid');
 const UrlRepository = require('../repositories/url.repository');
 const redisRepository = require("../repositories/redis.repository");
+const ClickRepository = require("../repositories/click.repository");
 const { validateAccessibleUrl, RESERVED_ALIASES } = require('../helpers/url.helper');
 const { pick } = require("../helpers/object.helper");
 
 const AppError = require('../errors/AppError')
 
+const MAX_SHORTCODE_RETRIES = 5;
 class UrlService {
-   async createShortUrl(data, userId) {
 
-    const { originalUrl, expiresAt, customAlias } = data;
+    buildShortUrlResponse(url) {
+
+        return {
+            originalUrl: url.originalUrl,
+            shortCode: url.shortCode,
+            shortUrl: `${process.env.BASE_URL}/${url.shortCode}`,
+            clicks: url.clicks,
+            createdAt: url.createdAt,
+            expiresAt: url.expiresAt
+        };
+
+    } 
+async createShortUrl(data, userId) {
+
+    const {
+        originalUrl,
+        expiresAt,
+        customAlias
+    } = data;
 
     if (!originalUrl) {
         throw new AppError(
@@ -17,31 +36,58 @@ class UrlService {
             400
         );
     }
+    for (let attempt = 1; attempt <= MAX_SHORTCODE_RETRIES; attempt++) {
 
-    const shortCode =
-        await this.generateShortCode(customAlias);
+        try {
 
-    const url = await UrlRepository.create({
+            const shortCode =
+                await this.generateShortCode(customAlias);
 
-        originalUrl,
+            const url =
+                await UrlRepository.create({
 
-        shortCode,
+                    originalUrl,
 
-        expiresAt,
+                    shortCode,
 
-        userId,
+                    expiresAt,
 
-        isCustomAlias: Boolean(customAlias)
+                    userId,
 
-    });
+                    isCustomAlias: Boolean(customAlias)
 
-    return {
-        originalUrl: url.originalUrl,
-        shortCode: url.shortCode,
-        shortUrl: `${process.env.BASE_URL}/${url.shortCode}`,
-        clicks: url.clicks,
-        createdAt: url.createdAt
-    };
+                });
+
+            return this.buildShortUrlResponse(url);
+
+        } catch (error) {
+
+            // Duplicate alias or generated code
+            if (error.code === 11000) {
+
+                // If it's a custom alias,
+                // retrying doesn't make sense.
+                if (customAlias) {
+                    throw new AppError(
+                        "Alias already exists.",
+                        409
+                    );
+                }
+
+                continue;
+            }
+
+            throw error;
+
+        }
+
+    }
+
+    throw new AppError(
+        "Unable to generate a unique short code. Please try again.",
+        500
+    );
+
 }
     async generateShortCode(customAlias) {
 
@@ -73,22 +119,11 @@ class UrlService {
         // ---------- Auto Generated Alias ----------
         const { nanoid } = await import("nanoid");
 
-        while (true) {
-
-            const shortCode = nanoid(8);
-
-            const existing =
-                await UrlRepository.findByShortCode(shortCode);
-
-            if (!existing) {
-                return shortCode;
-            }
-
-        }
+        return nanoid(8);
 
     }
 
-    async redirect(shortCode) {
+    async redirect(shortCode, req) {
 
         const cacheKey = `url:${shortCode}`;
 
@@ -134,6 +169,21 @@ class UrlService {
 
         // STEP 4 - Increment Click
         await redisRepository.increment(`click:${shortCode}`);
+        try {
+
+            await ClickRepository.create({
+
+                urlId: url._id,
+
+                shortCode: url.shortCode
+
+            });
+
+        } catch (error) {
+
+            console.error("Failed to save click analytics:", error);
+
+        }
 
         return url.originalUrl;
     }
@@ -213,6 +263,6 @@ class UrlService {
 
         return;
     }
-}s
+}
 
 module.exports = new UrlService();

@@ -27,5 +27,5 @@ const updateUrlSchema = Joi.object({
 }).min(1);
 
 module.exports = {
-    createShortUrlSchema
+    createShortUrlSchema, updateUrlSchema
 };
