@@ -4,35 +4,40 @@ const AppError = require("../errors/AppError");
 const rateLimiter = (options) => {
     return async (req, res, next) => {
         try {
-            const clientIp =
-                req.ip ||
-                req.headers["x-forwarded-for"] ||
-                req.connection.remoteAddress;
 
-            const key = `rate_limit:${clientIp}`;
+            const { strategy } = options;
 
-            const requestCount = await CacheHelper.incr(key);
+            const key = `rate_limit:${req.ip}`;
 
-            if (requestCount === 1) {
-                await CacheHelper.expire(key, options.WINDOW);
-            }
+            const result = await strategy.consume(
+                key,
+                options
+            );
 
-            if (requestCount > options.MAX_REQUESTS) {
+            res.setHeader(
+                "X-RateLimit-Limit",
+                result.limit
+            );
+
+            res.setHeader(
+                "X-RateLimit-Remaining",
+                result.remaining
+            );
+
+            res.setHeader(
+                "Retry-After",
+                result.retryAfter
+            );
+
+            if (!result.allowed) {
                 throw new AppError(
-                    "Too many requests. Please try again later.",
+                    "Too many requests",
                     429
                 );
             }
 
-            res.set({
-                "X-RateLimit-Limit": options.MAX_REQUESTS,
-                "X-RateLimit-Remaining": Math.max(
-                    0,
-                    options.MAX_REQUESTS - requestCount
-                )
-            });
-
             next();
+
         } catch (error) {
             next(error);
         }
