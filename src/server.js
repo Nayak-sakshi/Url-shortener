@@ -7,6 +7,7 @@ const clickSyncWorker = require("./workers/clickSync.worker");
 
 const PORT = process.env.PORT || 3000;
 
+// Start the server
 const startServer = async () => {
     try {
         await connectDB();
