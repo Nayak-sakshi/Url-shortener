@@ -1,6 +1,7 @@
-
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const UserRepository = require("../repositories/user.repository");
+const AppError = require("../errors/AppError");
 
 const SALT_ROUNDS = 10;
 

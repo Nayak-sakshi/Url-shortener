@@ -4,7 +4,7 @@
   "description": "this is my project to learn system-design concept.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --runInBand",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Nayak-sakshi/Url-shortener#readme",
   "dependencies": {
+    "axios": "^1.18.1",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -29,6 +30,8 @@
     "redis": "^6.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   }
 }

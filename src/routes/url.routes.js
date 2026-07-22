@@ -17,9 +17,6 @@ router.post(
 );
 
 router.get("/my", authenticate, urlController.getMyUrls);
-router.get("/:id", authenticate, urlController.getUrl);
-router.patch("/:id", authenticate, validate(updateUrlSchema), urlController.updateUrl);
-router.delete("/:id", authenticate, urlController.deleteUrl);
 
 router.get(
   "/:shortCode",
@@ -27,5 +24,8 @@ router.get(
   urlController.redirect
 );
 
+router.get("/:id", authenticate, urlController.getUrl);
+router.patch("/:id", authenticate, validate(updateUrlSchema), urlController.updateUrl);
+router.delete("/:id", authenticate, urlController.deleteUrl);
 
 module.exports = router;

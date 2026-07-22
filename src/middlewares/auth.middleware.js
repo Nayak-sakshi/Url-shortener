@@ -1,7 +1,7 @@
 const AppError = require("../errors/AppError");
 
 const UserRepository = require("../repositories/user.repository");
-const { verifyToken } = require("../helpers/auth.helper");
+const { verifyToken, getUserFromToken } = require("../helpers/auth.helper");
 const asyncHandler = require("../utils/asyncHandler");
 
 const authenticate = asyncHandler(async (req, res, next) => {

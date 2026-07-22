@@ -1,4 +1,3 @@
-const { nanoid } = require('nanoid');
 const UrlRepository = require('../repositories/url.repository');
 const redisRepository = require("../repositories/redis.repository");
 const ClickRepository = require("../repositories/click.repository");
