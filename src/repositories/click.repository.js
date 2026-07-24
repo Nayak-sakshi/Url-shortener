@@ -1,4 +1,5 @@
 const Click = require("../models/click.model");
+const mongoose = require("mongoose");
 
 class ClickRepository {
     async create(data) {
@@ -31,16 +32,21 @@ class ClickRepository {
 
     }
     async getTotalClicksByUrl(urlId) {
+        const result = await Click.countDocuments({ urlId });
+        return result;
+
+    }
+    async getTodayClicksByUrl(urlId) {
         const today = new Date();
 
         today.setHours(0, 0, 0, 0);
-        return Click.countDocuments({
+        const result = await Click.countDocuments({
             urlId,
             clickedAt: {
                 $gte: today
             }
         });
-
+        return result;
     }
     async getLast7DaysClicks(urlId) {
 
@@ -50,12 +56,12 @@ class ClickRepository {
 
         sevenDaysAgo.setHours(0, 0, 0, 0);
 
-        return Click.aggregate([
+        const result = await Click.aggregate([
 
             {
                 $match: {
 
-                    urlId,
+                    urlId: new mongoose.Types.ObjectId(urlId),
 
                     clickedAt: {
 
@@ -111,6 +117,8 @@ class ClickRepository {
             }
 
         ]);
+
+        return result;
 
     }
 }

@@ -1,4 +1,4 @@
-const AnalyticsService = require("../services/dashboard.service");
+const AnalyticsService = require("../services/analytics.service");
 const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
 
@@ -7,21 +7,14 @@ class AnalyticsController {
 
         const analytics =
             await AnalyticsService.getUrlAnalytics(
-
                 req.params.urlId,
-
                 req.user.id
-
             );
 
         return ApiResponse.success(
-
             res,
-
             analytics,
-
             "Analytics fetched successfully"
-
         );
 
     });

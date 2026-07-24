@@ -1,5 +1,6 @@
 const redisRepository = require("../repositories/redis.repository");
 const urlRepository = require("../repositories/url.repository");
+const clickRepository = require("../repositories/click.repository");
 
 class ClickSyncWorker {
     async syncClicks() {
@@ -13,10 +14,23 @@ class ClickSyncWorker {
 
             const shortCode = key.replace("click:", "");
 
-            await urlRepository.increamentClickBy(
-                shortCode,
-                Number(count)
-            );
+            const url = await urlRepository.findByShortCode(shortCode);
+
+            if (url) {
+                // Create individual Click records for analytics
+                for (let i = 0; i < Number(count); i++) {
+                    await clickRepository.create({
+                        urlId: url._id,
+                        shortCode: url.shortCode
+                    });
+                }
+
+                // Also update the URL clicks count
+                await urlRepository.increamentClickBy(
+                    shortCode,
+                    Number(count)
+                );
+            }
 
             await redisRepository.del(key);
 
