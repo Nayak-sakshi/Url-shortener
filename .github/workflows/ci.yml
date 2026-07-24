@@ -25,6 +25,7 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build \
+            -f Dockerfile.prod \
             -t ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest .
 
       - name: Login to Docker Hub
