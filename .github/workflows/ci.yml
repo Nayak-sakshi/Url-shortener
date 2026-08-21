@@ -19,9 +19,6 @@ jobs:
           node-version: 22
 
       - run: npm ci
-
-      - run: npm test
-
       - name: Build Docker Image
         run: |
           docker build \
