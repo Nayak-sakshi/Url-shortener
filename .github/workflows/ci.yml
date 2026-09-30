@@ -10,6 +10,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # The backend lives in its own folder of the repository
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
 
       - uses: actions/checkout@v4
