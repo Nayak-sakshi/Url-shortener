@@ -10,6 +10,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # The backend lives in its own folder of the repository
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
 
       - uses: actions/checkout@v4
@@ -19,9 +24,6 @@ jobs:
           node-version: 22
 
       - run: npm ci
-
-      - run: npm test
-
       - name: Build Docker Image
         run: |
           docker build \

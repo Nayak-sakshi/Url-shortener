@@ -1,0 +1,39 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "this is my project to learn system-design concept.",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --runInBand",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nayak-sakshi/Url-shortener.git"
+  },
+  "author": "Sakshi Nayak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nayak-sakshi/Url-shortener/issues"
+  },
+  "homepage": "https://github.com/Nayak-sakshi/Url-shortener#readme",
+  "dependencies": {
+    "axios": "^1.18.1",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "kafkajs": "^2.2.4",
+    "mongoose": "^9.7.4",
+    "nanoid": "^6.0.0",
+    "redis": "^6.1.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}
