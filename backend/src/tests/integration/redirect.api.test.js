@@ -122,3 +122,41 @@ describe('Redirect API Integration Tests (GET /api/v1/urls/:shortCode)', () => {
     expect(response.body.message).toContain('expired');
   });
 });
+
+describe('Root short link redirect (GET /:shortCode)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should redirect BASE_URL/<shortCode> like the API route', async () => {
+    redisRepository.get.mockResolvedValue(JSON.stringify({
+      originalUrl: 'https://google.com',
+      isActive: true,
+      expiresAt: null
+    }));
+    redisRepository.increment.mockResolvedValue(1);
+
+    const response = await request(app)
+      .get('/abc12')
+      .expect('Location', 'https://google.com');
+
+    expect(response.status).toBe(302);
+    expect(redisRepository.increment).toHaveBeenCalledWith('click:abc12');
+  });
+
+  it('should return 404 JSON for an unknown short code', async () => {
+    redisRepository.get.mockResolvedValue(null);
+    UrlRepository.findByShortCode.mockResolvedValue(null);
+
+    const response = await request(app).get('/missingcode');
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toContain('Short URL not found');
+  });
+
+  it('should not catch API routes', async () => {
+    const response = await request(app).get('/api/v1/dashboard');
+
+    expect(response.status).toBe(401);
+  });
+});

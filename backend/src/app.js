@@ -6,6 +6,7 @@ const urlRoutes = require("./routes/url.routes");
 const authRoutes = require("./routes/auth.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const analyticsRoutes = require("./routes/analytics.routes")
+const redirectRoutes = require("./routes/redirect.routes");
 const app = express();
 
 app.use(cors());
@@ -29,6 +30,10 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 
 app.use("/api/v1/analytics", analyticsRoutes)
+
+// Must stay last: catches BASE_URL/<shortCode>
+app.use("/", redirectRoutes);
+
 app.use(errorHandler);
 
 module.exports = app;
